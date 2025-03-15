@@ -125,41 +125,51 @@
 </div>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwyAnrPmLhvInl-Wekpoxwo6VvtQRhB5eQfOPITDRPhR5O99hXTLC_yO3PDQldA3GsbiQ/exec";
-    const form = document.getElementById("barangay-form");
-    const imageInput = document.getElementById("image");
+const scriptURL = "https://script.google.com/macros/s/AKfycbweZHV_gFNUXRoby5AgpKj00D5vGaUZwReZMChl06a5BPwirFxRBEcXPzw-7YhQO9MOjQ/exec";
+const form = document.getElementById("barangay-form");
+const submitButton = document.querySelector(".btn[type='submit']");
 
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-        const reader = new FileReader();
-        const file = imageInput.files[0];
+    // Disable the submit button to prevent double submission
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
 
-        if (file) {
-            reader.readAsDataURL(file);
-            reader.onloadend = function () {
-                const base64Image = reader.result.split(',')[1];
+    const fileInput = document.getElementById("image");
+    const file = fileInput.files[0];
 
-                const formData = new FormData(form);
-                formData.append("image", base64Image);
+    if (!file) {
+        alert("Please upload an ID image.");
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+        return;
+    }
 
-                fetch(scriptURL, { method: "POST", body: formData })
-                    .then(response => response.json())
-                    .then((data) => {
-                        if (data.status === "success") {
-                            alert("Form submitted successfully!");
-                            form.reset(); 
-                        } else {
-                            alert("Error: " + data.message);
-                        }
-                    })
-                    .catch(error => console.error("Error!", error.message));
-            };
-        } else {
-            alert("Please upload an image.");
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async function () {
+        const base64Image = reader.result.split(",")[1];
+        const formData = new FormData(form);
+        formData.append("image", base64Image);
+
+        try {
+            const response = await fetch(scriptURL, { method: "POST", body: formData });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert("Form submitted successfully!");
+                form.reset();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error!", error);
         }
-    });
-</script>
 
-</body>
-</html>
+        // Enable the submit button after submission
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+    };
+});
+</script>
