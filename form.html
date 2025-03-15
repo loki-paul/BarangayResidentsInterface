@@ -52,6 +52,12 @@
         .back-btn:hover {
             background-color: #999;
         }
+        .loading {
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -118,58 +124,68 @@
         <input type="file" id="image" accept="image/*" required>
 
         <div class="btn-container">
-            <button type="submit" class="submit-btn">Submit</button>
+            <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
             <button type="button" class="back-btn" onclick="window.location.href='index.html'">Go Back</button>
         </div>
+
+        <div class="loading" id="loading">Submitting... Please wait</div>
     </form>
 </div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbweZHV_gFNUXRoby5AgpKj00D5vGaUZwReZMChl06a5BPwirFxRBEcXPzw-7YhQO9MOjQ/exec";
-const form = document.getElementById("barangay-form");
-const submitButton = document.querySelector(".btn[type='submit']");
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwyAnrPmLhvInl-Wekpoxwo6VvtQRhB5eQfOPITDRPhR5O99hXTLC_yO3PDQldA3GsbiQ/exec";
+    const form = document.getElementById("barangay-form");
+    const imageInput = document.getElementById("image");
+    const submitBtn = document.getElementById("submit-btn");
+    const loadingMessage = document.getElementById("loading");
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
 
-    // Disable the submit button to prevent double submission
-    submitButton.disabled = true;
-    submitButton.textContent = "Submitting...";
+        // Disable the button & show loading message
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Submitting...";
+        loadingMessage.style.display = "block";
 
-    const fileInput = document.getElementById("image");
-    const file = fileInput.files[0];
+        setTimeout(() => {
+            const reader = new FileReader();
+            const file = imageInput.files[0];
 
-    if (!file) {
-        alert("Please upload an ID image.");
-        submitButton.disabled = false;
-        submitButton.textContent = "Submit";
-        return;
-    }
+            if (file) {
+                reader.readAsDataURL(file);
+                reader.onloadend = function () {
+                    const base64Image = reader.result.split(',')[1];
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async function () {
-        const base64Image = reader.result.split(",")[1];
-        const formData = new FormData(form);
-        formData.append("image", base64Image);
+                    const formData = new FormData(form);
+                    formData.append("image", base64Image);
 
-        try {
-            const response = await fetch(scriptURL, { method: "POST", body: formData });
-            const result = await response.json();
-
-            if (result.status === "success") {
-                alert("Form submitted successfully!");
-                form.reset();
+                    fetch(scriptURL, { method: "POST", body: formData })
+                        .then(response => response.json())
+                        .then((data) => {
+                            if (data.status === "success") {
+                                alert("Form submitted successfully!");
+                                form.reset();
+                            } else {
+                                alert("Error: " + data.message);
+                            }
+                        })
+                        .catch(error => console.error("Error!", error.message))
+                        .finally(() => {
+                            // Reset button & hide loading message after submission
+                            submitBtn.disabled = false;
+                            submitBtn.innerText = "Submit";
+                            loadingMessage.style.display = "none";
+                        });
+                };
             } else {
-                alert("Error: " + result.message);
+                alert("Please upload an image.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit";
+                loadingMessage.style.display = "none";
             }
-        } catch (error) {
-            console.error("Error!", error);
-        }
-
-        // Enable the submit button after submission
-        submitButton.disabled = false;
-        submitButton.textContent = "Submit";
-    };
-});
+        }, 3000); // 3 seconds delay to avoid multiple submissions
+    });
 </script>
+
+</body>
+</html>
