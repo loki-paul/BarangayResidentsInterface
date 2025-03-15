@@ -3,191 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barangay 186 Fill-up Form</title>
+    <title>Welcome to Barangay 186</title>
     <style>
         * {
-            box-sizing: border-box;
-            padding: 0;
             margin: 0;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f8f9fa;
+            text-align: center;
+            background-color: #f4f4f4;
             padding: 20px;
         }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            border-radius: 10px;
+        .logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+        }
+        h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .button {
             background-color: #003b5b;
             color: white;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        h4 {
-            text-align: center;
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-        input[type="file"] {
+            padding: 15px 30px;
             border: none;
-            background: white;
-        }
-        input[type="submit"] {
-            border: none;
-            background-color: orangered;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
             cursor: pointer;
+            border-radius: 5px;
             font-size: 18px;
-            margin-top: 10px;
         }
-        input[type="submit"]:hover {
-            background-color: #d35400;
-        }
-        .form-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .form-group input {
-            flex: 1;
-            min-width: 48%;
-        }
-
-        /* ✅ Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                max-width: 100%;
-            }
-            .form-group {
-                flex-direction: column;
-            }
-            .form-group input {
-                min-width: 100%;
-            }
+        .button:hover {
+            background-color: #002a42;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <form id="registration-form" enctype="multipart/form-data">
-            <h4>Fill-Up Form</h4>
-            
-            <label for="fullname">Full Name:</label>
-            <div class="form-group">
-                <input type="text" name="fullname" placeholder="e.g., Juan" required>
-                <input type="text" name="middlename" placeholder="e.g., Dela Cruz">
-            </div>
-            <div class="form-group">
-                <input type="text" name="lastname" placeholder="e.g., Santos" required>
-                <select name="suffix">
-                    <option value="">Suffix (Optional)</option>
-                    <option value="Jr">Jr.</option>
-                    <option value="Sr">Sr.</option>
-                    <option value="II">II</option>
-                    <option value="III">III</option>
-                </select>
-            </div>
-
-            <label for="birthday">Birthday:</label>
-            <input type="date" name="birthday" required>
-
-            <h4>Complete Address</h4>
-            <label for="address">House Number & Street:</label>
-            <div class="form-group">
-                <input type="text" name="house_number" placeholder="e.g., 123" required>
-                <input type="text" name="street" placeholder="e.g., Rizal Street" required>
-            </div>
-
-            <label for="contact">Contact Number:</label>
-            <input type="text" name="contact" placeholder="e.g., 09123456789" required>
-
-            <label for="gender">Gender:</label>
-            <select name="gender">
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select>
-
-            <label for="birthplace">Birthplace:</label>
-            <input type="text" name="birthplace" placeholder="e.g., Manila" required>
-
-            <label for="civilstatus">Civil Status:</label>
-            <input type="text" name="civilstatus" placeholder="e.g., Single / Married / Widowed" required>
-
-            <label for="religion">Religion:</label>
-            <input type="text" name="religion" placeholder="e.g., Roman Catholic" required>
-
-            <label for="yearofstay">Year of Stay:</label>
-            <input type="text" name="yearofstay" placeholder="e.g., 2015 - Present" required>
-
-            <label for="citizenship">Citizenship:</label>
-            <input type="text" name="citizenship" placeholder="e.g., Filipino" required>
-
-            <h4>Upload ID</h4>
-            <label for="image">Upload a clear image of your valid ID:</label>
-            <input type="file" name="image" accept="image/*" required>
-
-            <input type="submit" value="Submit">
-        </form>
+    <div class="logo-container">
+        <img src="logo-left.jpg" alt="Barangay Logo 1" class="logo">
+        <h1>Welcome to Barangay 186</h1>
+        <img src="logo-right.jpg" alt="Barangay Logo 2" class="logo">
     </div>
 
-    <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbzc3akBqUMISZCNFhr_yJ8qIH_D_LFfTx2Z703te9E9lNZA9SmdJshPQVDG_qp2Fm-ZAw/exec";
-
-        document.getElementById("registration-form").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const file = formData.get("image");
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    formData.set("image", reader.result.split(",")[1]); // Convert image to Base64
-                    submitData(formData);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                submitData(formData);
-            }
-        });
-
-        function submitData(formData) {
-            fetch(scriptURL, {
-                method: "POST",
-                body: formData,
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                alert("Form submitted successfully!");
-                console.log(data);
-            })
-            .catch((error) => {
-                alert("Error submitting form!");
-                console.error("Error:", error);
-            });
-        }
-    </script>
+    <div class="button-container">
+        <button class="button" onclick="location.href='form.html'">Fill-up Form</button>
+        <button class="button" onclick="alert('SABING WAG PINDUTIN E!!')">Wag Mo Pipindutin</button>
+    </div>
 </body>
 </html>
