@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Resident</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #003b5b;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #002a42;
+    }
+    .result-container {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .resident-card {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .resident-info {
+      padding: 10px;
+    }
+    /* Loading Spinner */
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #003b5b;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Search Resident</h2>
+    <input type="text" id="searchInput" placeholder="Enter First Name" />
+    <button onclick="searchResident()">Search</button>
+    <div id="resultContainer" class="result-container"></div>
+  </div>
+
+  <script>
+    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxLyFTOnboAtho9TsUrBPkXP3kG2iIV07WebA4ujKxLdRLjvty5knwviUpc6_i2f34flQ/exec";
+
+    async function searchResident() {
+      const firstName = document.getElementById("searchInput").value.trim();
+      const resultContainer = document.getElementById("resultContainer");
+
+      if (!firstName) {
+        alert("Please enter a first name.");
+        return;
+      }
+
+      resultContainer.innerHTML = '<div class="spinner"></div>'; // Show loading spinner
+
+      try {
+        const response = await fetch(`${GOOGLE_SHEETS_URL}?firstname=${encodeURIComponent(firstName)}`);
+        const data = await response.json();
+
+        if (!data.records || data.records.length === 0) {
+          resultContainer.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+
+        // Optional: log the resident object to check available keys for debugging.
+        // console.log(data.records);
+
+        resultContainer.innerHTML = data.records.map(resident => {
+          return `
+            <div class="resident-card">
+              <div class="resident-info">
+                <h3>
+                    ${resident["First Name"]} 
+                    ${resident["Middle Name"] ? resident["Middle Name"] + " " : ""}
+                    ${resident["Last Name"]}
+                    ${resident["Suffix"] && resident["Suffix"].toLowerCase() !== "none" ? " " + resident["Suffix"] : ""}
+                    </h3>
+
+                <p><strong>Birthday:</strong> ${resident["Birthday"] ? resident["Birthday"].split("T")[0] : "N/A"}</p>
+                <p><strong>Address:</strong> ${resident?.["Address"] || resident?.["complete_address"] || "N/A"}</p>
+                <p><strong>Contact:</strong> ${resident["Contact"] || "N/A"}</p>
+                <p><strong>Gender:</strong> ${resident["Sex"] || resident["Sex"] || "N/A"}</p>
+                <p><strong>Civil Status:</strong> ${resident["Civil Status"] || "N/A"}</p>
+                <p><strong>Religion:</strong> ${resident["Religion"] || "N/A"}</p>
+                <p><strong>Year of Stay:</strong> ${resident["Year of Stay"] || "N/A"}</p>
+                <p><strong>Citizenship:</strong> ${resident["Citizenship"] || "N/A"}</p>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        resultContainer.innerHTML = "<p>Error fetching data. Please try again later.</p>";
+      }
+    }
+  </script>
+
+</body>
+</html>
