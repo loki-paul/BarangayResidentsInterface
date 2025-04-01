@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Resident Information</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background-color: #f4f4f4; 
+      padding: 20px; 
+    }
+    .container { 
+      max-width: 600px; 
+      margin: auto; 
+      background: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    }
+    h2 { text-align: center; }
+    label { 
+      display: block; 
+      margin-top: 10px; 
+      font-weight: bold; 
+    }
+    input, select { 
+      width: 100%; 
+      padding: 8px; 
+      margin-top: 5px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+    }
+    button { 
+      width: 100%; 
+      padding: 10px; 
+      margin-top: 15px; 
+      background-color: #003b5b; 
+      color: white; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+    }
+    button:hover { background-color: #002a42; }
+    .loading { 
+      text-align: center; 
+      margin-top: 10px; 
+      display: none; 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Edit Resident Information</h2>
+    <form id="edit-form">
+      <label for="id">Resident ID</label>
+      <input type="text" id="id" name="id" readonly>
+      
+      <label for="firstname">First Name</label>
+      <input type="text" id="firstname" name="firstname" required>
+      
+      <label for="middlename">Middle Name</label>
+      <input type="text" id="middlename" name="middlename" required>
+      
+      <label for="lastname">Last Name</label>
+      <input type="text" id="lastname" name="lastname" required>
+      
+      <label for="suffix">Suffix</label>
+      <input type="text" id="suffix" name="suffix">
+      
+      <label for="birthday">Birthday</label>
+      <input type="date" id="birthday" name="birthday" required>
+      
+      <label for="complete_address">Complete Address</label>
+      <input type="text" id="complete_address" name="complete_address" required>
+      
+      <label for="contact">Contact Number</label>
+      <input type="text" id="contact" name="contact" required>
+      
+      <label for="sex">Sex</label>
+      <select id="sex" name="sex" required>
+        <option value="" disabled>Select Sex</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      
+      <label for="birthplace">Birthplace</label>
+      <input type="text" id="birthplace" name="birthplace" required>
+      
+      <label for="civilstatus">Civil Status</label>
+      <select id="civilstatus" name="civilstatus" required>
+        <option value="" disabled>Select Civil Status</option>
+        <option value="Single">Single</option>
+        <option value="Married">Married</option>
+        <option value="Widowed">Widowed</option>
+      </select>
+      
+      <label for="religion">Religion</label>
+      <input type="text" id="religion" name="religion" required>
+      
+      <label for="yearofstay">Year of Stay</label>
+      <input type="number" id="yearofstay" name="yearofstay" required>
+      
+      <label for="citizenship">Citizenship</label>
+      <input type="text" id="citizenship" name="citizenship" required>
+      
+      <button type="submit" id="update-btn">Update Information</button>
+    </form>
+    <div class="loading" id="loading">Updating... Please wait</div>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxbyOy06uk-DTPOAoItnPsT2TzclGNlCWv5xPbUCICV-2OHGPa2OHPBg3qTNA6nzkymPg/exec";
+    
+    // Get resident ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const residentID = urlParams.get('id');
+
+    // Fetch resident data on page load
+    if (residentID) {
+      fetchResidentData(residentID);
+    } else {
+      alert("No Resident ID provided!");
+    }
+
+    function fetchResidentData(id) {
+      const loadingElem = document.getElementById("loading");
+      loadingElem.style.display = "block";
+      fetch(`${scriptURL}?query=${encodeURIComponent(id)}`)
+        .then(response => response.json())
+        .then(data => {
+          loadingElem.style.display = "none";
+          if (data.records && data.records.length > 0) {
+            const resident = data.records[0];
+            document.getElementById("id").value = resident["ID"];
+            document.getElementById("firstname").value = resident["First Name"] || "";
+            document.getElementById("middlename").value = resident["Middle Name"] || "";
+            document.getElementById("lastname").value = resident["Last Name"] || "";
+            document.getElementById("suffix").value = resident["Suffix"] || "";
+            document.getElementById("birthday").value = resident["Birthday"] ? resident["Birthday"].split("T")[0] : "";
+            document.getElementById("complete_address").value = resident["Complete Address"] || resident["Address"] || "";
+            document.getElementById("contact").value = resident["Contact"] || "";
+            document.getElementById("sex").value = resident["Sex"] || "";
+            document.getElementById("birthplace").value = resident["Birthplace"] || "";
+            document.getElementById("civilstatus").value = resident["Civil Status"] || "";
+            document.getElementById("religion").value = resident["Religion"] || "";
+            document.getElementById("yearofstay").value = resident["Year of Stay"] || "";
+            document.getElementById("citizenship").value = resident["Citizenship"] || "";
+          } else {
+            alert("Resident not found!");
+          }
+        })
+        .catch(error => {
+          document.getElementById("loading").style.display = "none";
+          alert("Error fetching resident data: " + error);
+        });
+    }
+
+    // Instead of updating, display "Under Construction"
+    document.getElementById("edit-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Update feature is under construction.");
+    });
+  </script>
+
+</body>
+</html>
