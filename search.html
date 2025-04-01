@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search Resident</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Resident Information</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       background-color: #f4f4f4;
       padding: 20px;
     }
@@ -17,122 +16,116 @@
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     h2 {
-      margin-bottom: 20px;
+      text-align: center;
     }
     input {
-      width: 80%;
+      width: 100%;
       padding: 10px;
       margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    button {
-      padding: 10px 20px;
+    .results {
+      margin-top: 20px;
+    }
+    .result-item {
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .result-item h4 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+    }
+    .result-item p {
+      margin: 5px 0;
+    }
+    .view-btn {
+      display: inline-block;
       background-color: #003b5b;
       color: white;
+      padding: 5px 10px;
       border: none;
+      border-radius: 3px;
       cursor: pointer;
-      border-radius: 5px;
+      text-decoration: none;
     }
-    button:hover {
+    .view-btn:hover {
       background-color: #002a42;
     }
-    .result-container {
-      margin-top: 20px;
-      text-align: left;
-    }
-    .resident-card {
-      background: #e9ecef;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-    .resident-info {
-      padding: 10px;
-    }
-    /* Loading Spinner */
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #003b5b;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: 10px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .loading {
+      text-align: center;
+      font-size: 14px;
+      display: none;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Search Resident</h2>
-    <input type="text" id="searchInput" placeholder="Enter First Name" />
-    <button onclick="searchResident()">Search</button>
-    <div id="resultContainer" class="result-container"></div>
-  </div>
+<div class="container">
+  <h2>Search Resident Information</h2>
+  <input type="text" id="search-input" placeholder="Enter name or ID to search" oninput="searchResidents()">
+  <div class="loading" id="loading">Searching... Please wait</div>
+  <div class="results" id="results"></div>
+</div>
 
-  <script>
-    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxLyFTOnboAtho9TsUrBPkXP3kG2iIV07WebA4ujKxLdRLjvty5knwviUpc6_i2f34flQ/exec";
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbxbyOy06uk-DTPOAoItnPsT2TzclGNlCWv5xPbUCICV-2OHGPa2OHPBg3qTNA6nzkymPg/exec";
 
-    async function searchResident() {
-      const firstName = document.getElementById("searchInput").value.trim();
-      const resultContainer = document.getElementById("resultContainer");
+  function searchResidents() {
+    const query = document.getElementById("search-input").value.trim();
+    const resultsContainer = document.getElementById("results");
+    const loadingMessage = document.getElementById("loading");
 
-      if (!firstName) {
-        alert("Please enter a first name.");
-        return;
-      }
-
-      resultContainer.innerHTML = '<div class="spinner"></div>'; // Show loading spinner
-
-      try {
-        const response = await fetch(`${GOOGLE_SHEETS_URL}?firstname=${encodeURIComponent(firstName)}`);
-        const data = await response.json();
-
-        if (!data.records || data.records.length === 0) {
-          resultContainer.innerHTML = "<p>No results found.</p>";
-          return;
-        }
-
-        // Optional: log the resident object to check available keys for debugging.
-        // console.log(data.records);
-
-        resultContainer.innerHTML = data.records.map(resident => {
-          return `
-            <div class="resident-card">
-              <div class="resident-info">
-                <h3>
-                    ${resident["First Name"]} 
-                    ${resident["Middle Name"] ? resident["Middle Name"] + " " : ""}
-                    ${resident["Last Name"]}
-                    ${resident["Suffix"] && resident["Suffix"].toLowerCase() !== "none" ? " " + resident["Suffix"] : ""}
-                    </h3>
-
-                <p><strong>Birthday:</strong> ${resident["Birthday"] ? resident["Birthday"].split("T")[0] : "N/A"}</p>
-                <p><strong>Address:</strong> ${resident?.["Address"] || resident?.["complete_address"] || "N/A"}</p>
-                <p><strong>Contact:</strong> ${resident["Contact"] || "N/A"}</p>
-                <p><strong>Gender:</strong> ${resident["Sex"] || resident["Sex"] || "N/A"}</p>
-                <p><strong>Civil Status:</strong> ${resident["Civil Status"] || "N/A"}</p>
-                <p><strong>Religion:</strong> ${resident["Religion"] || "N/A"}</p>
-                <p><strong>Year of Stay:</strong> ${resident["Year of Stay"] || "N/A"}</p>
-                <p><strong>Citizenship:</strong> ${resident["Citizenship"] || "N/A"}</p>
-              </div>
-            </div>
-          `;
-        }).join("");
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        resultContainer.innerHTML = "<p>Error fetching data. Please try again later.</p>";
-      }
+    if (!query) {
+      resultsContainer.innerHTML = "";
+      return;
     }
-  </script>
+    
+    loadingMessage.style.display = "block";
+
+    fetch(`${scriptURL}?query=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        loadingMessage.style.display = "none";
+        if (data.records && data.records.length > 0) {
+          displayResults(data.records);
+        } else {
+          resultsContainer.innerHTML = "<p>No results found.</p>";
+        }
+      })
+      .catch(error => {
+        loadingMessage.style.display = "none";
+        console.error("Error fetching data:", error);
+        resultsContainer.innerHTML = "<p>Error retrieving search results. Please try again.</p>";
+      });
+  }
+
+  function displayResults(records) {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = "";
+    records.forEach(record => {
+      const resultItem = document.createElement("div");
+      resultItem.classList.add("result-item");
+      resultItem.innerHTML = `
+        <h4>${record["First Name"]} ${record["Last Name"]} (${record["ID"]})</h4>
+        <p>Address: ${record["Complete Address"] || record["Address"] || "N/A"}</p>
+        <p>Contact: ${record["Contact"] || "N/A"}</p>
+        <p>Birthday: ${record["Birthday"] ? record["Birthday"].split("T")[0] : "N/A"}</p>
+        <p>Civil Status: ${record["Civil Status"] || "N/A"}</p>
+        <a href="editinfo.html?id=${record["ID"]}" class="view-btn">Edit Information</a>
+      `;
+      resultsContainer.appendChild(resultItem);
+    });
+  }
+</script>
 
 </body>
 </html>
