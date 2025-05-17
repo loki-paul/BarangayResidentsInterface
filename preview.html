@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Submission</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        h2 { margin-bottom: 20px; }
+        p { text-align: left; margin: 10px 0; }
+        .btn-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button { padding: 10px; border: none; cursor: pointer; }
+        .ok-btn { background-color: #003b5b; color: white; }
+        .ok-btn:hover { background-color: #002a42; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Preview Your Submission</h2>
+    <div id="previewData"></div>
+    <div class="btn-container">
+        <button class="ok-btn" onclick="submitFinal()">OK</button>
+    </div>
+</div>
+
+<script>
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        let previewHtml = "";
+        for (const [key, value] of params.entries()) {
+            previewHtml += `<p><strong>${key.replace(/_/g, " ")}:</strong> ${decodeURIComponent(value)}</p>`;
+        }
+        document.getElementById("previewData").innerHTML = previewHtml;
+    }
+    
+    function submitFinal() {
+        const params = new URLSearchParams(window.location.search);
+        fetch("https://script.google.com/macros/s/AKfycbwyAnrPmLhvInl-Wekpoxwo6VvtQRhB5eQfOPITDRPhR5O99hXTLC_yO3PDQldA3GsbiQ/exec", {
+            method: "POST",
+            body: params,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("Form submitted successfully!");
+                window.location.href = "index.html"; // Redirect to landing page
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error!", error.message));
+    }
+
+    getQueryParams();
+</script>
+
+</body>
+</html>
