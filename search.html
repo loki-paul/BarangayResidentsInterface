@@ -1,63 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Search Resident Information</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
+
   <style>
     body {
-      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
-      padding: 20px;
     }
     .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      text-align: center;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .results {
-      margin-top: 20px;
+      margin-top: 40px;
+      margin-bottom: 40px;
     }
     .result-item {
-      padding: 10px;
+      padding: 15px;
       background-color: #f9f9f9;
       border: 1px solid #ddd;
       margin-bottom: 10px;
       border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
     }
-    .result-item h4 {
-      margin: 0;
-      font-size: 16px;
-      color: #333;
+    .result-info {
+      flex-grow: 1;
     }
-    .result-item p {
-      margin: 5px 0;
+    .btn-group {
+      margin-top: 10px;
+    }
+    .view-btn, .request-btn {
+      padding: 5px 10px;
+      border-radius: 3px;
+      text-decoration: none;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
     .view-btn {
-      display: inline-block;
       background-color: #003b5b;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      text-decoration: none;
     }
     .view-btn:hover {
       background-color: #002a42;
+    }
+    .request-btn {
+      background-color: #198754; /* green */
+      margin-left: 8px;
+    }
+    .request-btn:hover {
+      background-color: #146c43;
     }
     .loading {
       text-align: center;
@@ -69,15 +63,47 @@
 </head>
 <body>
 
-<div class="container">
-  <h2>Search Resident Information</h2>
-  <input type="text" id="search-input" placeholder="Enter name or ID to search" oninput="searchResidents()">
-  <div class="loading" id="loading">Searching... Please wait</div>
-  <div class="results" id="results"></div>
+<div class="container bg-white p-4 rounded shadow">
+  <h2 class="text-center mb-4">Search Resident Information</h2>
+
+  <div class="mb-3">
+    <input type="text" id="search-input" class="form-control" placeholder="Enter name or ID to search" oninput="searchResidents()" />
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <select class="form-select" id="sort-select" onchange="sortResults()">
+        <option value="">Sort by</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="id">ID (Ascending)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Searching... Please wait</div>
+  <div id="results"></div>
+
+  <div class="mt-4 text-center">
+    <a href="index.html" class="btn btn-secondary">⬅ Back to Home</a>
+  </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbxaobnYEf4_QlPY5lBqxlJ6gq1lLcyLev9TDwBxKeym50FlhQip1SuM4H-MInFnnsgUTQ/exec";
+  const scriptURL = "https://script.google.com/macros/s/AKfycbxbyOy06uk-DTPOAoItnPsT2TzclGNlCWv5xPbUCICV-2OHGPa2OHPBg3qTNA6nzkymPg/exec";
+  let currentData = [];
+
+  window.onload = function () {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q');
+    if (query) {
+      const searchInput = document.getElementById('search-input');
+      searchInput.value = query;
+      searchResidents();
+    }
+  };
 
   function searchResidents() {
     const query = document.getElementById("search-input").value.trim();
@@ -86,17 +112,20 @@
 
     if (!query) {
       resultsContainer.innerHTML = "";
+      loadingMessage.style.display = "none";
       return;
     }
-    
+
     loadingMessage.style.display = "block";
+    resultsContainer.innerHTML = "";
 
     fetch(`${scriptURL}?query=${encodeURIComponent(query)}`)
       .then(response => response.json())
       .then(data => {
         loadingMessage.style.display = "none";
-        if (data.records && data.records.length > 0) {
-          displayResults(data.records);
+        currentData = data.records || [];
+        if (currentData.length > 0) {
+          renderResults(currentData);
         } else {
           resultsContainer.innerHTML = "<p>No results found.</p>";
         }
@@ -108,22 +137,60 @@
       });
   }
 
-  function displayResults(records) {
+  function renderResults(data) {
     const resultsContainer = document.getElementById("results");
     resultsContainer.innerHTML = "";
-    records.forEach(record => {
-      const resultItem = document.createElement("div");
-      resultItem.classList.add("result-item");
-      resultItem.innerHTML = `
-        <h4>${record["First Name"]} ${record["Last Name"]} (${record["ID"]})</h4>
-        <p>Address: ${record["Complete Address"] || record["Address"] || "N/A"}</p>
-        <p>Contact: ${record["Contact"] || "N/A"}</p>
-        <p>Birthday: ${record["Birthday"] ? record["Birthday"].split("T")[0] : "N/A"}</p>
-        <p>Civil Status: ${record["Civil Status"] || "N/A"}</p>
-        <a href="editinfo.html?id=${record["ID"]}" class="view-btn">Edit Information</a>
+
+    data.forEach(record => {
+      const item = document.createElement("div");
+      item.classList.add("result-item");
+
+      item.innerHTML = `
+        <div class="result-info">
+          <h5>${record["First Name"]} ${record["Last Name"]} (${record["ID"]})</h5>
+          <p><strong>Address:</strong> ${record["Complete Address"] || record["Address"] || "N/A"}</p>
+          <p><strong>Contact:</strong> ${record["Contact"] || "N/A"}</p>
+          <p><strong>Birthday:</strong> ${record["Birthday"] ? record["Birthday"].split("T")[0] : "N/A"}</p>
+          <p><strong>Civil Status:</strong> ${record["Civil Status"] || "N/A"}</p>
+        </div>
+        <div class="btn-group">
+          <a href="editinfo.html?id=${record["ID"]}" class="view-btn">Edit Information</a>
+          <button class="request-btn">Request</button>
+        </div>
       `;
-      resultsContainer.appendChild(resultItem);
+
+      // Clicking the whole item (except buttons) triggers request
+      item.querySelector('.result-info').onclick = () => openRequestPage(record);
+      item.querySelector('.request-btn').onclick = (e) => {
+        e.stopPropagation();
+        openRequestPage(record);
+      };
+
+      resultsContainer.appendChild(item);
     });
+  }
+
+  function sortResults() {
+    const sortBy = document.getElementById("sort-select").value;
+    if (!sortBy) return renderResults(currentData);
+
+    const sorted = [...currentData];
+
+    if (sortBy === "name") {
+      sorted.sort((a, b) => {
+        const nameA = (a["First Name"] + a["Last Name"]).toLowerCase();
+        const nameB = (b["First Name"] + b["Last Name"]).toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    } else if (sortBy === "id") {
+      sorted.sort((a, b) => parseInt(a["ID"]) - parseInt(b["ID"]));
+    }
+
+    renderResults(sorted);
+  }
+
+  function openRequestPage(resident) {
+    window.location.href = `request.html?id=${encodeURIComponent(resident["ID"])}`;
   }
 </script>
 
